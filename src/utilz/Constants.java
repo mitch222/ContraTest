@@ -9,9 +9,9 @@ public class Constants {
     }
 
     public static class PlayerConstants {
-        public static final int IDLE = 0;
-        public static final int RUNNING = 4;
-        public static final int JUMP = 2;
+        public static final int IDLE = 1;
+        public static final int RUNNING = 9;
+        public static final int JUMP = 3;
         public static final int GROUND = 6;
 
 
