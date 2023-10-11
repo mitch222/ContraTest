@@ -7,9 +7,6 @@ import java.awt.*;
 import java.io.IOException;
 import java.io.InputStream;
 
-import static utilz.Constants.PlayerConstants.ARMRIGTH;
-import static utilz.Constants.PlayerConstants.ARMUP;
-
 public class Gun extends Entity{
     private Image[] position;
     private int gunPos;
@@ -21,11 +18,12 @@ public class Gun extends Entity{
         actualWidth = width;
         actualHeight = height;
         loadStatic();
-        initHitbox(x,y,1,1);
+        initHitbox(x,y,width,height);
     }
 
-    public void render(Graphics g) {
-        g.drawImage(position[gunPos], (int) (hitbox.x), (int) (hitbox.y), (int)(actualWidth*Game.SCALE), (int)(actualHeight*Game.SCALE), null);
+    public void render(Graphics g, int lvlOffset) {
+        drawHitbox(g, lvlOffset);
+        g.drawImage(position[gunPos], (int) (hitbox.x) - lvlOffset, (int) (hitbox.y), (int)(actualWidth*Game.SCALE), (int)(actualHeight*Game.SCALE), null);
     }
 
     public void setArms(String posArms) {
