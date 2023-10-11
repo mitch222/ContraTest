@@ -18,7 +18,7 @@ public class Player extends Entity {
     private int playerAction = IDLE;
     private boolean moving = false, attacking = false;
     private boolean left, up, right, down, jump;
-    private float playerSpeed = 1.20f;
+    private float playerSpeed = 0.9f * Game.SCALE;
     private int[][] lvlData;
     private float xDrawOffset = 7 * Game.SCALE;
     private float yDrawOffset = 21 * Game.SCALE;
@@ -32,15 +32,17 @@ public class Player extends Entity {
 
     //Brazos Y arma
 
-    private Image arms;
-    private Image gun;
+    private Image[] arms;
+    private int armPos = ARMRIGTH;
+    private Gun gun;
 
 
     public Player(float x, float y, int width, int height) {
         super(x, y, width, height);
         loadAnimations();
         loadStatic();
-        initHitbox(x, y, 12 * Game.SCALE, 26 * Game.SCALE);
+        initHitbox(x, y, (int)(12 * Game.SCALE), (int)(26 * Game.SCALE));
+        gun = new Gun(((hitbox.x - xDrawOffset) + 10), (int) ((hitbox.y - yDrawOffset) + 37), 26, 7);
 
     }
 
@@ -48,13 +50,14 @@ public class Player extends Entity {
         updatePos();
         updateAnimationTick();
         setAnimation();
+        setArms();
     }
 
     public void render(Graphics g) {
         g.drawImage(animations[playerAction][aniIndex], (int) (hitbox.x - xDrawOffset), (int) (hitbox.y - yDrawOffset), width, height, null);
         //drawHitbox(g);
-        g.drawImage(arms,(int) ((hitbox.x - xDrawOffset) + 6), (int) ((hitbox.y - yDrawOffset) + 18), (int)(32*Game.SCALE), (int)(32*Game.SCALE), null);
-        g.drawImage(gun,(int) ((hitbox.x - xDrawOffset) + 10), (int) ((hitbox.y - yDrawOffset) + 37), (int)(26*Game.SCALE), (int)(7*Game.SCALE), null);
+        g.drawImage(arms[armPos], (int) ((hitbox.x - xDrawOffset) + 6), (int) ((hitbox.y - yDrawOffset) + 18), (int) (32 * Game.SCALE), (int) (32 * Game.SCALE), null);
+        gun.render(g);
     }
 
     private void updateAnimationTick() {
@@ -90,6 +93,20 @@ public class Player extends Entity {
             resetAniTick();
     }
 
+    private void setArms() {
+        int startPos = armPos;
+
+        if (up) {
+            armPos = ARMUP;
+            gun.setArms("up");
+        }
+        else {
+            armPos = ARMRIGTH;
+            gun.setArms("right");
+        }
+
+    }
+
     private void resetAniTick() {
         aniTick = 0;
         aniIndex = 0;
@@ -110,6 +127,7 @@ public class Player extends Entity {
         if (right)
             xSpeed += playerSpeed;
 
+
         if (!inAir)
             if (!IsEntityOnFloor(hitbox, lvlData))
                 inAir = true;
@@ -117,6 +135,7 @@ public class Player extends Entity {
         if (inAir) {
             if (CanMoveHere(hitbox.x, hitbox.y + airSpeed, hitbox.width, hitbox.height, lvlData)) {
                 hitbox.y += airSpeed;
+                gun.hitbox.y += airSpeed;
                 airSpeed += gravity;
                 updateXPos(xSpeed);
             } else {
@@ -150,6 +169,7 @@ public class Player extends Entity {
     private void updateXPos(float xSpeed) {
         if (CanMoveHere(hitbox.x + xSpeed, hitbox.y, hitbox.width, hitbox.height, lvlData)) {
             hitbox.x += xSpeed;
+            gun.hitbox.x += xSpeed;
         } else {
             hitbox.x = GetEntityXPosNextToWall(hitbox, xSpeed);
         }
@@ -183,13 +203,15 @@ public class Player extends Entity {
     }
 
     private void loadStatic() {
-        InputStream is = getClass().getResourceAsStream("/3 Hands/1 Biker/8.png");
+        InputStream is = null;
         try {
-            BufferedImage img = ImageIO.read(is);
-            arms = img;
-            is = getClass().getResourceAsStream("/2 Guns/1_1.png");
-            img = ImageIO.read(is);
-            gun = img;
+            Image img;
+            arms = new Image[3];
+            for (int i = 0; i < arms.length; i++) {
+                is = getClass().getResourceAsStream("/3 Hands/1 Biker/" + (8 + i) +".png");
+                img = ImageIO.read(is);
+                arms[i] = img;
+            }
         } catch (IOException e) {
             e.printStackTrace();
         } finally {
