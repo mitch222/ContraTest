@@ -1,6 +1,7 @@
 package entities;
 
 import main.Game;
+import utilz.LoadSave;
 
 import static utilz.Constants.PlayerConstants.*;
 import static utilz.HelpMethods.*;
@@ -22,6 +23,8 @@ public class Player extends Entity {
     private int[][] lvlData;
     private float xDrawOffset = 7 * Game.SCALE;
     private float yDrawOffset = 21 * Game.SCALE;
+    private int flipX = 0;
+    private int flipW = 1;
 
     // Jumping / Gravity
     private float airSpeed = 0f;
@@ -32,9 +35,13 @@ public class Player extends Entity {
 
     //Brazos Y arma
 
-    private Image[] arms;
+    private BufferedImage[] arms;
     private int armPos = ARMRIGTH;
+    private float posArmX;
+    private float posAmrY;
+
     private Gun gun;
+    private int recoil = 65;
 
 
     public Player(float x, float y, int width, int height) {
@@ -42,21 +49,28 @@ public class Player extends Entity {
         loadAnimations();
         loadStatic();
         initHitbox(x, y, (int)(12 * Game.SCALE), (int)(26 * Game.SCALE));
-        gun = new Gun(((hitbox.x - xDrawOffset) + 10), (int) ((hitbox.y - yDrawOffset) + 37), 26, 7);
+        this.posArmX = (hitbox.x + 6);
+        this.posAmrY = (hitbox.y + 18);
+        gun = new Gun(((hitbox.x - xDrawOffset) + 10), (int) ((hitbox.y - yDrawOffset) + 37), (int)(26 * Game.SCALE), (int)(7 * Game.SCALE));
 
     }
 
     public void update() {
+        if(recoil>0)
+            recoil--;
         updatePos();
         updateAnimationTick();
         setAnimation();
         setArms();
+        gun.updateProjectiles(lvlData);
     }
 
     public void render(Graphics g,  int lvlOffset) {
-        g.drawImage(animations[playerAction][aniIndex], (int) (hitbox.x - xDrawOffset) - lvlOffset, (int) (hitbox.y - yDrawOffset), width, height, null);
-        drawHitbox(g, lvlOffset);
-        g.drawImage(arms[armPos], (int) ((hitbox.x - xDrawOffset) + 6) - lvlOffset, (int) ((hitbox.y - yDrawOffset) + 18), (int) (32 * Game.SCALE), (int) (32 * Game.SCALE), null);
+        g.drawImage(animations[playerAction][aniIndex], (int) (hitbox.x - xDrawOffset) - lvlOffset + flipX/2,
+                (int) (hitbox.y - yDrawOffset), width * flipW, height, null);
+        //drawHitbox(g, lvlOffset);
+        g.drawImage(arms[armPos], (int) (posArmX - xDrawOffset) - lvlOffset + flipX/4,
+                (int) (posAmrY - yDrawOffset), (int) (32 * Game.SCALE) * flipW, (int) (32 * Game.SCALE), null);
         gun.render(g, lvlOffset);
     }
 
@@ -67,7 +81,6 @@ public class Player extends Entity {
             aniIndex++;
             if (aniIndex >= GetSpriteAmount(playerAction)) {
                 aniIndex = 0;
-                attacking = false;
             }
         }
     }
@@ -75,13 +88,24 @@ public class Player extends Entity {
     private void setAnimation() {
         int startAni = playerAction;
 
-        if (moving)
-            playerAction = RUNNING;
-        else
+        if (moving) {
+            if(attacking && recoil == 0){
+                playerAction = RUNNING;
+                gun.shootGun();
+                recoil = 65;
+            }
+            else
+                playerAction = RUNNING;
+        }
+        else{
+            if (attacking && recoil == 0){
+                playerAction = IDLE;
+                gun.shootGun();
+                recoil = 65;
+            }
             playerAction = IDLE;
+        }
 
-        /*if (attacking)
-            playerAction = ATTACK_1;*/
         if (inAir) {
             if (airSpeed < 0)
                 playerAction = JUMP;
@@ -124,10 +148,18 @@ public class Player extends Entity {
 
         float xSpeed = 0;
 
-        if (left)
+        if (left) {
             xSpeed -= playerSpeed;
-        if (right)
+            flipX = width;
+            flipW = -1;
+            gun.updatePos("left");
+        }
+        if (right) {
             xSpeed += playerSpeed;
+            flipX = 0;
+            flipW = 1;
+            gun.updatePos("right");
+        }
 
         if (!inAir)
             if (!IsEntityOnFloor(hitbox, lvlData))
@@ -136,7 +168,8 @@ public class Player extends Entity {
         if (inAir) {
             if (CanMoveHere(hitbox.x, hitbox.y + airSpeed, hitbox.width, hitbox.height, lvlData)) {
                 hitbox.y += airSpeed;
-                gun.hitbox.y += airSpeed;
+                posAmrY = (int) (hitbox.y + 18);
+                gun.hitbox.y = (int) ((hitbox.y - yDrawOffset) + 37);
                 airSpeed += gravity;
                 updateXPos(xSpeed);
             } else {
@@ -170,7 +203,8 @@ public class Player extends Entity {
     private void updateXPos(float xSpeed) {
         if (CanMoveHere(hitbox.x + xSpeed, hitbox.y, hitbox.width, hitbox.height, lvlData)) {
             hitbox.x += xSpeed;
-            gun.hitbox.x += xSpeed;
+            posArmX = (int) (hitbox.x  + 6);
+            gun.hitbox.x = (int) ((hitbox.x - xDrawOffset) + 10);
         } else {
             hitbox.x = GetEntityXPosNextToWall(hitbox, xSpeed);
         }
@@ -183,31 +217,18 @@ public class Player extends Entity {
             inAir = true;
     }
     private void loadAnimations() {
-        InputStream is = getClass().getResourceAsStream("/PSD/Biker.png");
-        try {
-            BufferedImage img = ImageIO.read(is);
-
+            BufferedImage img = LoadSave.GetSpriteAtlas(LoadSave.PLAYER_ATLAS);
             animations = new BufferedImage[10][6];
             for (int j = 0; j < animations.length; j++)
                 for (int i = 0; i < animations[j].length; i++)
                     animations[j][i] = img.getSubimage(i * 48, j * 48, 48, 48);
-
-        } catch (IOException e) {
-            e.printStackTrace();
-        } finally {
-            try {
-                is.close();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
     }
 
     private void loadStatic() {
         InputStream is = null;
         try {
-            Image img;
-            arms = new Image[3];
+            BufferedImage img;
+            arms = new BufferedImage[3];
             for (int i = 0; i < arms.length; i++) {
                 is = getClass().getResourceAsStream("/3 Hands/1 Biker/" + (8 + i) +".png");
                 img = ImageIO.read(is);

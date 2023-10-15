@@ -4,7 +4,76 @@ import main.Game;
 
 public class Constants {
 
+    public static class EnemyConstants {
+        public static final int SKATER = 1;
+        public static final int IDLE = 3;
+        public static final int RUNNING = 4;
+        public static final int ATTACK = 0;
+        public static final int HIT = 2;
+        public static final int DEAD = 1;
+
+        public static final int SKATER_WIDTH_DEFAULT = 48;
+        public static final int SKATER_HEIGHT_DEFAULT = 48;
+
+        public static final int SKATER_WIDTH = (int) (SKATER_WIDTH_DEFAULT * Game.SCALE);
+        public static final int SKATER_HEIGHT = (int) (SKATER_HEIGHT_DEFAULT * Game.SCALE);
+        public static final int SKATER_DRAWOFFSET_X = (int) (7 * Game.SCALE);
+        public static final int SKATER_DRAWOFFSET_Y = (int) (21 * Game.SCALE);
+
+        public static int GetSpriteAmount(int enemy_type, int enemy_state) {
+
+            switch (enemy_type) {
+                case SKATER:
+                    switch (enemy_state) {
+                        case IDLE:
+                            return 4;
+                        case RUNNING:
+                            return 6;
+                        case ATTACK:
+                            return 6;
+                        case HIT:
+                            return 2;
+                        case DEAD:
+                            return 6;
+                    }
+            }
+
+            return 0;
+
+        }
+
+    }
+
+    public static class Projectiles{
+        public static final int BULLET_DEFAULT_WIDTH = 6;
+        public static final int BULLET_DEFAULT_HEIGHT = 3;
+        public static final int BULLET_WIDTH = (int)(Game.SCALE * BULLET_DEFAULT_WIDTH);
+        public static final int BULLET_HEIGHT = (int)(Game.SCALE * BULLET_DEFAULT_HEIGHT);
+        public static final float SPEED = 1.15f * Game.SCALE;
+    }
+    public static class Environment {
+        public static final int BIG_CLOUD_WIDTH_DEFAULT = 576;
+        public static final int BIG_CLOUD_HEIGHT_DEFAULT = 324;
+        public static final int BUILDING_FAR_WIDTH_DEFAULT = 576;
+        public static final int BUILDING_FAR_HEIGHT_DEFAULT = 324;
+
+        public static final int BUILDING_MEDIUM_WIDTH_DEFAULT = 576;
+        public static final int BUILDING_MEDIUM_HEIGHT_DEFAULT = 324;
+        public static final int BUILDING_CLOSE_WIDTH_DEFAULT = 576;
+        public static final int BUILDING_CLOSE_HEIGHT_DEFAULT = 324;
+
+        public static final int BIG_CLOUD_WIDTH = (int) (BIG_CLOUD_WIDTH_DEFAULT * Game.SCALE);
+        public static final int BIG_CLOUD_HEIGHT = (int) (BIG_CLOUD_HEIGHT_DEFAULT * Game.SCALE);
+        public static final int BUILDING_FAR_WIDTH = (int) (BUILDING_FAR_WIDTH_DEFAULT * Game.SCALE);
+        public static final int BUILDING_FAR_HEIGHT = (int) (BUILDING_FAR_HEIGHT_DEFAULT* Game.SCALE);
+        public static final int BUILDING_MEDIUM_WIDTH = (int) (BUILDING_MEDIUM_WIDTH_DEFAULT * Game.SCALE);
+        public static final int BUILDING_MEDIUM_HEIGHT = (int) (BUILDING_MEDIUM_HEIGHT_DEFAULT* Game.SCALE);
+        public static final int BUILDING_CLOSE_WIDTH = (int) (BUILDING_CLOSE_WIDTH_DEFAULT * Game.SCALE);
+        public static final int BUILDING_CLOSE_HEIGHT = (int) (BUILDING_CLOSE_HEIGHT_DEFAULT* Game.SCALE);
+    }
+
     public static class UI {
+
         public static class Buttons {
             public static final int B_WIDTH_DEFAULT = 140;
             public static final int B_HEIGHT_DEFAULT = 56;

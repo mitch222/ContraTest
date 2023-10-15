@@ -1,17 +1,29 @@
 package entities;
 
 import main.Game;
+import objects.Projectile;
+import utilz.LoadSave;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
+import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
+
+import static utilz.Constants.Projectiles.*;
+import static utilz.HelpMethods.*;
+import static utilz.HelpMethods.GetEntityYPosUnderRoofOrAboveFloor;
 
 public class Gun extends Entity{
     private Image[] position;
+    private BufferedImage ammoImg;
     private int gunPos;
     private int actualWidth;
     private int actualHeight;
+    private ArrayList<Projectile> ammo = new ArrayList<>();
+    private int flipX = 0;
+    private int flipW = 1;
 
     public Gun(float x, float y, int width, int height) {
         super(x, y, width, height);
@@ -22,22 +34,57 @@ public class Gun extends Entity{
     }
 
     public void render(Graphics g, int lvlOffset) {
-        drawHitbox(g, lvlOffset);
-        g.drawImage(position[gunPos], (int) (hitbox.x) - lvlOffset, (int) (hitbox.y), (int)(actualWidth*Game.SCALE), (int)(actualHeight*Game.SCALE), null);
+        //drawHitbox(g, lvlOffset);
+        g.drawImage(position[gunPos], (int) (hitbox.x) - lvlOffset + flipX/2, (int) (hitbox.y), actualWidth * flipW, actualHeight, null);
+        drawProjectiles(g, lvlOffset);
+    }
+
+    private void drawProjectiles(Graphics g, int xLvlOffset) {
+        for (Projectile p : ammo)
+            if (p.isActive())
+                g.drawImage(ammoImg, (int) (p.getHitbox().x - xLvlOffset), (int) (p.getHitbox().y), BULLET_WIDTH, BULLET_HEIGHT, null);
+
     }
 
     public void setArms(String posArms) {
 
         if (posArms.equals("up")){
-            actualWidth = 21;
-            actualHeight = 20;
+            actualWidth = (int) (21 * Game.SCALE);
+            actualHeight = (int)(20 * Game.SCALE);
             gunPos = 1;
         }
         else {
-            actualWidth = 26;
-            actualHeight = 7;
+            actualWidth = (int) (26 * Game.SCALE);
+            actualHeight = (int) (7 * Game.SCALE);
             gunPos = 0;
         }
+    }
+
+    public void shootGun() {
+        int dir = 1;
+        ammo.add(new Projectile((int) this.getHitbox().x, (int) this.getHitbox().y, dir));
+    }
+
+    public void updateProjectiles(int[][] lvlData) {
+        for (Projectile p : ammo)
+            if (p.isActive()) {
+                p.updatePos();
+                if (IsProjectileHittingLevel(p, lvlData)) {
+                    p.setActive(false);
+                }
+            }
+    }
+
+    public void updatePos(String dir) {
+        if (dir.equals("left")) {
+            flipX = actualWidth;
+            flipW = -1;
+        }
+        if (dir.equals("right")) {
+            flipX = 0;
+            flipW = 1;
+        }
+
     }
 
     private void loadStatic() {
@@ -50,6 +97,7 @@ public class Gun extends Entity{
                 img = ImageIO.read(is);
                 position[i] = img;
             }
+            ammoImg = LoadSave.GetSpriteAtlas(LoadSave.BULLET1);
         } catch (IOException e) {
             e.printStackTrace();
         } finally {
