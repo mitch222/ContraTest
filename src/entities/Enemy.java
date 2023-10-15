@@ -26,6 +26,8 @@ public abstract class Enemy extends Entity {
     public Enemy(float x, float y, int width, int height, int enemyType) {
         super(x, y, width, height);
         this.enemyType = enemyType;
+        this.maxHealth = GetMaxHealth(enemyType);
+        currentHealth = maxHealth;
         initHitbox(x, y, width, height);
 
     }

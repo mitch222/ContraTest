@@ -53,7 +53,7 @@ public class EnemyManager {
             if (c.isActive())
                 if (bullet.getHitbox().intersects(c.getHitbox()) && bullet.isActive()) {
                     bullet.setActive(false);
-                    c.hurt(10);
+                    c.hurt(3);
                     return;
                 }
     }
