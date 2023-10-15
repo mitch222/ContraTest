@@ -3,12 +3,15 @@ package gamestates;
 import java.awt.*;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
+import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 
 import entities.EnemyManager;
 import entities.Player;
 import levels.LevelManager;
 import main.Game;
+import objects.Projectile;
+import ui.GameOverOverlay;
 import ui.PauseOverlay;
 import utilz.LoadSave;
 
@@ -19,6 +22,7 @@ public class Playing extends State implements Statemethods {
     private LevelManager levelManager;
     private EnemyManager enemyManager;
     private PauseOverlay pauseOverlay;
+    private GameOverOverlay gameOverOverlay;
     private boolean paused = false;
     private int xLvlOffset;
     private int leftBorder = (int) (0.2 * Game.GAME_WIDTH);
@@ -28,6 +32,8 @@ public class Playing extends State implements Statemethods {
     private int maxLvlOffsetX = maxTilesOffset * Game.TILES_SIZE;
 
     private BufferedImage backgroundImg, bigCloud, buildingFar, buildingMedium, buildingClose;
+
+    private boolean gameOver;
 
     public Playing(Game game) {
         super(game);
@@ -43,21 +49,22 @@ public class Playing extends State implements Statemethods {
     private void initClasses() {
         levelManager = new LevelManager(game);
         enemyManager = new EnemyManager(this);
-        player = new Player(200, 200, (int) (48 * Game.SCALE), (int) (48 * Game.SCALE));
+        player = new Player(200, 200, (int) (48 * Game.SCALE), (int) (48 * Game.SCALE), this);
         player.loadLvlData(levelManager.getCurrentLevel().getLevelData());
         pauseOverlay = new PauseOverlay(this);
+        gameOverOverlay = new GameOverOverlay(this);
     }
 
     @Override
     public void update() {
-        if (!paused) {
+        if (!paused && !gameOver) {
             levelManager.update();
             player.update();
             enemyManager.update(levelManager.getCurrentLevel().getLevelData(), player);
             checkCloseToBorder();
-        } else {
+        } else
             pauseOverlay.update();
-        }
+
     }
 
     private void checkCloseToBorder() {
@@ -89,7 +96,8 @@ public class Playing extends State implements Statemethods {
             g.setColor(new Color(0, 0, 0, 150));
             g.fillRect(0, 0, Game.GAME_WIDTH, Game.GAME_HEIGHT);
             pauseOverlay.draw(g);
-        }
+        } else if (gameOver)
+            gameOverOverlay.draw(g);
     }
 
     private void drawBuildings(Graphics g) {
@@ -103,77 +111,101 @@ public class Playing extends State implements Statemethods {
 
     }
 
+    public void resetAll() {
+        gameOver = false;
+        paused = false;
+        player.resetAll();
+        enemyManager.resetAllEnemies();
+    }
+
+    public void setGameOver(boolean gameOver) {
+        this.gameOver = gameOver;
+    }
+
+    public void checkEnemyHit(Projectile attackBox) {
+        enemyManager.checkEnemyHit(attackBox);
+    }
+
     @Override
     public void mouseClicked(MouseEvent e) {
     }
 
     @Override
     public void keyPressed(KeyEvent e) {
-        switch (e.getKeyCode()) {
-            case KeyEvent.VK_A:
-                player.setLeft(true);
-                break;
-            case KeyEvent.VK_W:
-                player.setUp(true);
-                break;
-            case KeyEvent.VK_D:
-                player.setRight(true);
-                break;
-            case KeyEvent.VK_SPACE:
-                player.setJump(true);
-                break;
-            case KeyEvent.VK_J:
-                player.setAttacking(true);
-                break;
-            case KeyEvent.VK_ESCAPE:
-                paused = !paused;
-                break;
+        if (gameOver)
+            gameOverOverlay.keyPressed(e);
+        else {
+            switch (e.getKeyCode()) {
+                case KeyEvent.VK_A:
+                    player.setLeft(true);
+                    break;
+                case KeyEvent.VK_W:
+                    player.setUp(true);
+                    break;
+                case KeyEvent.VK_D:
+                    player.setRight(true);
+                    break;
+                case KeyEvent.VK_SPACE:
+                    player.setJump(true);
+                    break;
+                case KeyEvent.VK_J:
+                    player.setAttacking(true);
+                    break;
+                case KeyEvent.VK_ESCAPE:
+                    paused = !paused;
+                    break;
+            }
         }
     }
 
     @Override
     public void keyReleased(KeyEvent e) {
-        switch (e.getKeyCode()) {
-            case KeyEvent.VK_A:
-                player.setLeft(false);
-                break;
-            case KeyEvent.VK_D:
-                player.setRight(false);
-                break;
-            case KeyEvent.VK_W:
-                player.setUp(false);
-                break;
-            case KeyEvent.VK_J:
-                player.setAttacking(false);
-                break;
-            case KeyEvent.VK_SPACE:
-                player.setJump(false);
-                break;
-        }
+        if (!gameOver)
 
+            switch (e.getKeyCode()) {
+                case KeyEvent.VK_A:
+                    player.setLeft(false);
+                    break;
+                case KeyEvent.VK_D:
+                    player.setRight(false);
+                    break;
+                case KeyEvent.VK_W:
+                    player.setUp(false);
+                    break;
+                case KeyEvent.VK_J:
+                    player.setAttacking(false);
+                    break;
+                case KeyEvent.VK_SPACE:
+                    player.setJump(false);
+                    break;
+
+        }
     }
     public void mouseDragged(MouseEvent e) {
-        if (paused)
-            pauseOverlay.mouseDragged(e);
+        if (!gameOver)
+            if (paused)
+                pauseOverlay.mouseDragged(e);
     }
 
     @Override
     public void mousePressed(MouseEvent e) {
-        if (paused)
-            pauseOverlay.mousePressed(e);
+        if (gameOver)
+            if (paused)
+                pauseOverlay.mousePressed(e);
     }
 
     @Override
     public void mouseReleased(MouseEvent e) {
-        if (paused)
-            pauseOverlay.mouseReleased(e);
+        if (!gameOver)
+            if (paused)
+                pauseOverlay.mouseReleased(e);
     }
 
     @Override
     public void mouseMoved(MouseEvent e) {
-        if (paused)
-            pauseOverlay.mouseMoved(e);
-
+        if (!gameOver)
+            if (paused)
+                pauseOverlay.mouseMoved(e);
     }
 
     public void unpauseGame() {

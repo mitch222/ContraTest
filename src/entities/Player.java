@@ -1,5 +1,6 @@
 package entities;
 
+import gamestates.Playing;
 import main.Game;
 import utilz.LoadSave;
 
@@ -43,9 +44,28 @@ public class Player extends Entity {
     private Gun gun;
     private int recoil = 65;
 
+    // StatusBarUI
+    private BufferedImage statusBarImg;
 
-    public Player(float x, float y, int width, int height) {
+    private int statusBarWidth = (int) (192 * Game.SCALE);
+    private int statusBarHeight = (int) (58 * Game.SCALE);
+    private int statusBarX = (int) (10 * Game.SCALE);
+    private int statusBarY = (int) (10 * Game.SCALE);
+
+    private int healthBarWidth = (int) (150 * Game.SCALE);
+    private int healthBarHeight = (int) (4 * Game.SCALE);
+    private int healthBarXStart = (int) (34 * Game.SCALE);
+    private int healthBarYStart = (int) (14 * Game.SCALE);
+
+    private int maxHealth = 10;
+    private int currentHealth = maxHealth;
+    private int healthWidth = healthBarWidth;
+    private Playing playing;
+
+
+    public Player(float x, float y, int width, int height, Playing playing) {
         super(x, y, width, height);
+        this.playing = playing;
         loadAnimations();
         loadStatic();
         initHitbox(x, y, (int)(12 * Game.SCALE), (int)(26 * Game.SCALE));
@@ -56,6 +76,12 @@ public class Player extends Entity {
     }
 
     public void update() {
+        updateHealthBar();
+
+        if (currentHealth <= 0) {
+            playing.setGameOver(true);
+            return;
+        }
         if(recoil>0)
             recoil--;
         updatePos();
@@ -63,6 +89,7 @@ public class Player extends Entity {
         setAnimation();
         setArms();
         gun.updateProjectiles(lvlData);
+        checkAttack();
     }
 
     public void render(Graphics g,  int lvlOffset) {
@@ -72,6 +99,13 @@ public class Player extends Entity {
         g.drawImage(arms[armPos], (int) (posArmX - xDrawOffset) - lvlOffset + flipX/4,
                 (int) (posAmrY - yDrawOffset), (int) (32 * Game.SCALE) * flipW, (int) (32 * Game.SCALE), null);
         gun.render(g, lvlOffset);
+        drawUI(g);
+    }
+
+    private void drawUI(Graphics g) {
+        g.drawImage(statusBarImg, statusBarX, statusBarY, statusBarWidth, statusBarHeight, null);
+        g.setColor(Color.red);
+        g.fillRect(healthBarXStart + statusBarX, healthBarYStart + statusBarY, healthWidth, healthBarHeight);
     }
 
     private void updateAnimationTick() {
@@ -84,6 +118,19 @@ public class Player extends Entity {
             }
         }
     }
+
+    private void updateHealthBar() {
+        healthWidth = (int) ((currentHealth / (float) maxHealth) * healthBarWidth);
+    }
+
+    private void checkAttack() {
+        if(!gun.getAmmo().isEmpty()) {
+            for (int i = 0; i < gun.getAmmo().size(); i++) {
+                playing.checkEnemyHit(gun.getAmmo().get(i));
+            }
+        }
+    }
+
 
     private void setAnimation() {
         int startAni = playerAction;
@@ -210,6 +257,14 @@ public class Player extends Entity {
         }
 
     }
+    public void changeHealth(int value) {
+        currentHealth += value;
+
+        if (currentHealth <= 0)
+            currentHealth = 0;
+        else if (currentHealth >= maxHealth)
+            currentHealth = maxHealth;
+    }
 
     public void loadLvlData(int[][] lvlData) {
         this.lvlData = lvlData;
@@ -225,6 +280,7 @@ public class Player extends Entity {
     }
 
     private void loadStatic() {
+        statusBarImg = LoadSave.GetSpriteAtlas(LoadSave.STATUS_BAR);
         InputStream is = null;
         try {
             BufferedImage img;
@@ -292,4 +348,18 @@ public class Player extends Entity {
         this.jump = jump;
     }
 
+    public void resetAll() {
+        resetDirBooleans();
+        inAir = false;
+        attacking = false;
+        moving = false;
+        playerAction = IDLE;
+        currentHealth = maxHealth;
+
+        hitbox.x = x;
+        hitbox.y = y;
+
+        if (!IsEntityOnFloor(hitbox, lvlData))
+            inAir = true;
+    }
 }

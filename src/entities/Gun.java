@@ -24,6 +24,7 @@ public class Gun extends Entity{
     private ArrayList<Projectile> ammo = new ArrayList<>();
     private int flipX = 0;
     private int flipW = 1;
+    private String dir = "right";
 
     public Gun(float x, float y, int width, int height) {
         super(x, y, width, height);
@@ -61,7 +62,6 @@ public class Gun extends Entity{
     }
 
     public void shootGun() {
-        int dir = 1;
         ammo.add(new Projectile((int) this.getHitbox().x, (int) this.getHitbox().y, dir));
     }
 
@@ -77,10 +77,12 @@ public class Gun extends Entity{
 
     public void updatePos(String dir) {
         if (dir.equals("left")) {
+            this.dir = dir;
             flipX = actualWidth;
             flipW = -1;
         }
         if (dir.equals("right")) {
+            this.dir = dir;
             flipX = 0;
             flipW = 1;
         }
@@ -139,5 +141,9 @@ public class Gun extends Entity{
 
     public void setActualHeight(int actualHeight) {
         this.actualHeight = actualHeight;
+    }
+
+    public ArrayList<Projectile> getAmmo() {
+        return ammo;
     }
 }

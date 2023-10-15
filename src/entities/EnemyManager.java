@@ -1,10 +1,12 @@
 package entities;
 
 import java.awt.Graphics;
+import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 
 import gamestates.Playing;
+import objects.Projectile;
 import utilz.LoadSave;
 import static utilz.Constants.EnemyConstants.*;
 
@@ -27,7 +29,8 @@ public class EnemyManager {
 
     public void update(int[][] lvlData, Player player) {
         for (Skater c : skaters)
-            c.update(lvlData, player);
+            if (c.isActive())
+                c.update(lvlData, player);
     }
 
     public void draw(Graphics g, int xLvlOffset) {
@@ -36,10 +39,23 @@ public class EnemyManager {
 
     private void drawSkaters(Graphics g, int xLvlOffset) {
         for (Skater c : skaters) {
-            c.drawHitbox(g,xLvlOffset);
-            g.drawImage(skaterArr[c.getEnemyState()][c.getAniIndex()], (int) c.getHitbox().x - xLvlOffset - SKATER_DRAWOFFSET_X + c.flipX()/2,
-                    (int) c.getHitbox().y - SKATER_DRAWOFFSET_Y, SKATER_WIDTH * c.flipW(), SKATER_HEIGHT, null);
+            if (c.isActive()) {
+                c.drawHitbox(g, xLvlOffset);
+                g.drawImage(skaterArr[c.getEnemyState()][c.getAniIndex()], (int) c.getHitbox().x - xLvlOffset - SKATER_DRAWOFFSET_X + c.flipX() / 2,
+                        (int) c.getHitbox().y - SKATER_DRAWOFFSET_Y, SKATER_WIDTH * c.flipW(), SKATER_HEIGHT, null);
+                c.drawAttackBox(g, xLvlOffset);
+            }
         }
+    }
+
+    public void checkEnemyHit(Projectile bullet) {
+        for (Skater c : skaters)
+            if (c.isActive())
+                if (bullet.getHitbox().intersects(c.getHitbox()) && bullet.isActive()) {
+                    bullet.setActive(false);
+                    c.hurt(10);
+                    return;
+                }
     }
 
     private void loadEnemyImgs() {
@@ -48,5 +64,10 @@ public class EnemyManager {
         for (int j = 0; j < skaterArr.length; j++)
             for (int i = 0; i < skaterArr[j].length; i++)
                 skaterArr[j][i] = temp.getSubimage(i * SKATER_WIDTH_DEFAULT, j * SKATER_HEIGHT_DEFAULT, SKATER_WIDTH_DEFAULT, SKATER_HEIGHT_DEFAULT);
+    }
+
+    public void resetAllEnemies() {
+        for (Skater c : skaters)
+            c.resetEnemy();
     }
 }
