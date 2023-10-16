@@ -6,6 +6,7 @@ import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 
 import gamestates.Playing;
+import levels.Level;
 import objects.Projectile;
 import utilz.LoadSave;
 import static utilz.Constants.EnemyConstants.*;
@@ -19,18 +20,21 @@ public class EnemyManager {
     public EnemyManager(Playing playing) {
         this.playing = playing;
         loadEnemyImgs();
-        addEnemies();
     }
 
-    private void addEnemies() {
-        skaters = LoadSave.GetSkaters();
-        System.out.println("size of crabs: " + skaters.size());
+    public void loadEnemies(Level level) {
+        skaters = level.getSkates();
     }
 
     public void update(int[][] lvlData, Player player) {
+        boolean isAnyActive = false;
         for (Skater c : skaters)
-            if (c.isActive())
+            if (c.isActive()) {
                 c.update(lvlData, player);
+                isAnyActive = true;
+            }
+        if(!isAnyActive)
+            playing.setLevelCompleted(true);
     }
 
     public void draw(Graphics g, int xLvlOffset) {
