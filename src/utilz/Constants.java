@@ -6,6 +6,7 @@ public class Constants {
 
     public static class EnemyConstants {
         public static final int SKATER = 1;
+        public static final int TURRET = 2;
         public static final int IDLE = 3;
         public static final int RUNNING = 4;
         public static final int ATTACK = 0;
@@ -19,6 +20,15 @@ public class Constants {
         public static final int SKATER_HEIGHT = (int) (SKATER_HEIGHT_DEFAULT * Game.SCALE);
         public static final int SKATER_DRAWOFFSET_X = (int) (7 * Game.SCALE);
         public static final int SKATER_DRAWOFFSET_Y = (int) (21 * Game.SCALE);
+
+        public static final int TURRET_WIDTH_DEFAULT = 48;
+        public static final int TURRET_HEIGHT_DEFAULT = 48;
+
+        public static final int TURRET_WIDTH = (int) (TURRET_WIDTH_DEFAULT * Game.SCALE);
+        public static final int TURRET_HEIGHT = (int) (TURRET_HEIGHT_DEFAULT * Game.SCALE);
+        public static final int TURRET_DRAWOFFSET_X = (int) (7 * Game.SCALE);
+        public static final int TURRET_DRAWOFFSET_Y = (int) (21 * Game.SCALE);
+
 
         public static int GetSpriteAmount(int enemy_type, int enemy_state) {
 
@@ -36,6 +46,13 @@ public class Constants {
                         case DEAD:
                             return 6;
                     }
+                case TURRET:
+                    switch (enemy_state) {
+                        case IDLE, RUNNING, ATTACK, DEAD:
+                            return 4;
+                        case HIT:
+                            return 2;
+                    }
             }
 
             return 0;
@@ -45,6 +62,8 @@ public class Constants {
             switch (enemy_type) {
                 case SKATER:
                     return 10;
+                case TURRET:
+                    return 5;
                 default:
                     return 1;
             }
@@ -54,6 +73,8 @@ public class Constants {
             switch (enemy_type) {
                 case SKATER:
                     return 4;
+                case TURRET:
+                    return 1;
                 default:
                     return 0;
             }

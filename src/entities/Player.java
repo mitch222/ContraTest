@@ -30,7 +30,7 @@ public class Player extends Entity {
     // Jumping / Gravity
     private float airSpeed = 0f;
     private float gravity = 0.04f * Game.SCALE;
-    private float jumpSpeed = -2.25f * Game.SCALE;
+    private float jumpSpeed = -2.35f * Game.SCALE;
     private float fallSpeedAfterCollision = 0.5f * Game.SCALE;
     private boolean inAir = false;
 
@@ -42,7 +42,7 @@ public class Player extends Entity {
     private float posAmrY;
 
     private Gun gun;
-    private int recoil = 65;
+
 
     // StatusBarUI
     private BufferedImage statusBarImg;
@@ -89,8 +89,8 @@ public class Player extends Entity {
             playing.setGameOver(true);
             return;
         }
-        if(recoil>0)
-            recoil--;
+        if(gun.getRecoil()>0)
+            gun.setRecoil(gun.getRecoil()-1);
         updatePos();
         updateAnimationTick();
         setAnimation();
@@ -143,19 +143,19 @@ public class Player extends Entity {
         int startAni = playerAction;
 
         if (moving) {
-            if(attacking && recoil == 0){
+            if(attacking && gun.getRecoil() == 0){
                 playerAction = RUNNING;
                 gun.shootGun();
-                recoil = 65;
+                gun.setRecoil(65);
             }
             else
                 playerAction = RUNNING;
         }
         else{
-            if (attacking && recoil == 0){
+            if (attacking && gun.getRecoil() == 0){
                 playerAction = IDLE;
                 gun.shootGun();
-                recoil = 65;
+                gun.setRecoil(65);
             }
             playerAction = IDLE;
         }

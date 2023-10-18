@@ -97,52 +97,20 @@ public class HelpMethods {
         return true;
     }
 
-    public static boolean IsSightClear(int[][] lvlData, Rectangle2D.Float firstHitbox, Rectangle2D.Float secondHitbox, int yTile) {
-        int firstXTile = (int) (firstHitbox.x / Game.TILES_SIZE);
-        int secondXTile = (int) (secondHitbox.x / Game.TILES_SIZE);
+    public static boolean IsSightClear(int[][] lvlData, Rectangle2D.Float enemyBox, Rectangle2D.Float playerBox, int yTile) {
+        int firstXTile = (int) (enemyBox.x / Game.TILES_SIZE);
+
+        int secondXTile;
+        if (IsSolid(playerBox.x, playerBox.y + playerBox.height + 1, lvlData))
+            secondXTile = (int) (playerBox.x / Game.TILES_SIZE);
+        else
+            secondXTile = (int) ((playerBox.x + playerBox.width) / Game.TILES_SIZE);
 
         if (firstXTile > secondXTile)
             return IsAllTilesWalkable(secondXTile, firstXTile, yTile, lvlData);
         else
             return IsAllTilesWalkable(firstXTile, secondXTile, yTile, lvlData);
 
-    }
-
-    public static int[][] GetLevelData(BufferedImage img) {
-        int[][] lvlData = new int[img.getHeight()][img.getWidth()];
-        for (int j = 0; j < img.getHeight(); j++)
-            for (int i = 0; i < img.getWidth(); i++) {
-                Color color = new Color(img.getRGB(i, j));
-                int value = color.getRed();
-                if (value >= 81)
-                    value = 0;
-                lvlData[j][i] = value;
-            }
-        return lvlData;
-    }
-
-    public static ArrayList<Skater> GetSkaters(BufferedImage img) {
-        ArrayList<Skater> list = new ArrayList<>();
-        for (int j = 0; j < img.getHeight(); j++)
-            for (int i = 0; i < img.getWidth(); i++) {
-                Color color = new Color(img.getRGB(i, j));
-                int value = color.getGreen();
-                if (value == SKATER)
-                    list.add(new Skater(i * Game.TILES_SIZE, j * Game.TILES_SIZE));
-            }
-        return list;
-
-    }
-
-    public static Point GetPlayerSpawn(BufferedImage img) {
-        for (int j = 0; j < img.getHeight(); j++)
-            for (int i = 0; i < img.getWidth(); i++) {
-                Color color = new Color(img.getRGB(i, j));
-                int value = color.getGreen();
-                if (value == 90)
-                    return new Point(i * Game.TILES_SIZE, j * Game.TILES_SIZE);
-            }
-        return new Point(1 * Game.TILES_SIZE, 1 * Game.TILES_SIZE);
     }
 
 }

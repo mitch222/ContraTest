@@ -41,10 +41,11 @@ public class Skater extends Enemy{
                     newState(RUNNING);
                     break;
                 case RUNNING:
-                    if (canSeePlayer(lvlData, player))
+                    if (canSeePlayer(lvlData, player)) {
                         turnTowardsPlayer(player);
-                    if (isPlayerCloseForAttack(player))
-                        newState(ATTACK);
+                        if (isPlayerCloseForAttack(player))
+                            newState(ATTACK);
+                    }
 
                     move(lvlData);
                     break;
@@ -55,7 +56,6 @@ public class Skater extends Enemy{
                     // Changed the name for checkEnemyHit to checkPlayerHit
                     if (aniIndex == 3 && !attackChecked)
                         checkPlayerHit(attackBox, player);
-
                     break;
                 case HIT:
                     break;

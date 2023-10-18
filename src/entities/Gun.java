@@ -25,6 +25,7 @@ public class Gun extends Entity{
     private int flipX = 0;
     private int flipW = 1;
     private String dir = "right";
+    private int recoil = 65;
 
     public Gun(float x, float y, int width, int height) {
         super(x, y, width, height);
@@ -145,5 +146,13 @@ public class Gun extends Entity{
 
     public ArrayList<Projectile> getAmmo() {
         return ammo;
+    }
+
+    public int getRecoil() {
+        return recoil;
+    }
+
+    public void setRecoil(int recoil) {
+        this.recoil = recoil;
     }
 }
