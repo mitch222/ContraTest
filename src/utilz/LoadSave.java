@@ -29,6 +29,7 @@ public class LoadSave {
     public static final String TURRET_SPRITE = "Turret.png";
     public static final String STATUS_BAR = "health_power_bar.png";
     public static final String COMPLETED_IMG = "completed_sprite.png";
+    public static final String FLAG_ATLAS = "Flag.png";
     public static BufferedImage GetSpriteAtlas(String fileName) {
         BufferedImage img = null;
         InputStream is = LoadSave.class.getResourceAsStream("/" + fileName);

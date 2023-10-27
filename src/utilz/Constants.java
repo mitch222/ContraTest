@@ -4,6 +4,17 @@ import main.Game;
 
 public class Constants {
 
+    public static class ObjectConstants {
+
+        public static final int FLAG = 0;
+
+        public static final int FLAG_WIDTH_DEFAULT = 32;
+        public static final int FLAG_HEIGHT_DEFAULT = 64;
+        public static final int FLAG_WIDTH = (int) (Game.SCALE * FLAG_WIDTH_DEFAULT);
+        public static final int FLAG_HEIGHT = (int) (Game.SCALE * FLAG_HEIGHT_DEFAULT);
+
+    }
+
     public static class EnemyConstants {
         public static final int SKATER = 1;
         public static final int TURRET = 2;

@@ -7,8 +7,10 @@ import java.util.ArrayList;
 import entities.Skater;
 import entities.Turret;
 import main.Game;
+import objects.Flag;
 
 import static utilz.Constants.EnemyConstants.*;
+import static utilz.Constants.ObjectConstants.FLAG;
 
 public class Level {
 
@@ -16,6 +18,7 @@ public class Level {
     private int[][] lvlData;
     private ArrayList<Skater> skaters = new ArrayList<>();
     private ArrayList<Turret> turrets = new ArrayList<>();
+    private ArrayList<Flag> checkpoints = new ArrayList<>();
     private int lvlTilesWide;
     private int maxTilesOffset;
     private int maxLvlOffsetX;
@@ -41,9 +44,11 @@ public class Level {
                 Color c = new Color(img.getRGB(x, y));
                 int red = c.getRed();
                 int green = c.getGreen();
+                int blue = c.getBlue();
 
                 loadLevelData(red, x, y);
                 loadEntities(green, x, y);
+                loadObjects(blue, x, y);
             }
     }
 
@@ -60,6 +65,12 @@ public class Level {
             case SKATER -> skaters.add(new Skater(x * Game.TILES_SIZE, y * Game.TILES_SIZE));
             case TURRET -> turrets.add(new Turret(x * Game.TILES_SIZE, y * Game.TILES_SIZE));
             case 90 -> playerSpawn = new Point(x * Game.TILES_SIZE, y * Game.TILES_SIZE);
+        }
+    }
+
+    private void loadObjects(int blueValue, int x, int y) {
+        switch (blueValue) {
+            case FLAG -> checkpoints.add(new Flag(x * Game.TILES_SIZE, y * Game.TILES_SIZE, blueValue));
         }
     }
 
@@ -86,4 +97,7 @@ public class Level {
         return playerSpawn;
     }
 
+    public ArrayList<Flag> getCheckpoints() {
+        return checkpoints;
+    }
 }
