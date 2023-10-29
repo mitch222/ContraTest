@@ -28,8 +28,8 @@ public class GameOverOverlay {
 
     public void keyPressed(KeyEvent e) {
         if (e.getKeyCode() == KeyEvent.VK_ESCAPE) {
-            playing.resetAll();
-            Gamestate.state = Gamestate.MENU;
+            playing.restore();
+            //Gamestate.state = Gamestate.MENU;
         }
     }
 }

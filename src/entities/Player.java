@@ -14,7 +14,7 @@ import java.io.InputStream;
 
 import javax.imageio.ImageIO;
 
-public class Player extends Entity {
+public class Player extends Entity{
     private BufferedImage[][] animations;
     private int aniTick, aniIndex, aniSpeed = 30;
     private int playerAction = IDLE;
@@ -58,7 +58,7 @@ public class Player extends Entity {
     private int healthBarYStart = (int) (14 * Game.SCALE);
 
     private int maxHealth = 10;
-    private int currentHealth = maxHealth;
+    public int currentHealth = maxHealth;
     private int healthWidth = healthBarWidth;
     private Playing playing;
 
@@ -72,6 +72,33 @@ public class Player extends Entity {
         this.posArmX = (hitbox.x + 6);
         this.posAmrY = (hitbox.y + 18);
         gun = new Gun(((hitbox.x - xDrawOffset) + 10), (int) ((hitbox.y - yDrawOffset) + 37), (int)(26 * Game.SCALE), (int)(7 * Game.SCALE));
+
+    }
+
+    public Player(Player original) {
+        super(original.hitbox.x, original.hitbox.y, original.width, original.height);
+        this.playing = original.playing;
+        currentHealth = original.currentHealth;
+        loadAnimations();
+        loadStatic();
+        initHitbox(original.hitbox.x, original.hitbox.y, (int)(12 * Game.SCALE), (int)(26 * Game.SCALE));
+        this.posArmX = (hitbox.x + 6);
+        this.posAmrY = (hitbox.y + 18);
+        gun = original.gun;
+
+        lvlData = original.lvlData;
+
+        resetDirBooleans();
+        inAir = false;
+        attacking = false;
+        moving = false;
+        playerAction = IDLE;
+
+        hitbox.x = x;
+        hitbox.y = y;
+
+        if (!IsEntityOnFloor(hitbox, lvlData))
+            inAir = true;
 
     }
 
@@ -92,6 +119,8 @@ public class Player extends Entity {
         if(gun.getRecoil()>0)
             gun.setRecoil(gun.getRecoil()-1);
         updatePos();
+        if (moving)
+            checkPotionTouched();
         updateAnimationTick();
         setAnimation();
         setArms();
@@ -138,6 +167,9 @@ public class Player extends Entity {
         }
     }
 
+    private void checkPotionTouched() {
+        playing.checkPotionTouched(hitbox);
+    }
 
     private void setAnimation() {
         int startAni = playerAction;

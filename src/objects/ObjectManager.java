@@ -5,6 +5,7 @@ import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 
+import gamestates.Checkpoint;
 import gamestates.Playing;
 import levels.Level;
 import utilz.LoadSave;
@@ -15,6 +16,7 @@ public class ObjectManager {
     private Playing playing;
     private BufferedImage flagSprite;
     private ArrayList<Flag> checkpoint;
+    private Checkpoint lastCheck;
     private Level currentLevel;
 
     public ObjectManager(Playing playing) {
@@ -33,9 +35,11 @@ public class ObjectManager {
             }
     }
 
-    public void applyEffectToPlayer(Flag p) {
-        if (p.getObjType() == FLAG)
-            playing.savePoint();
+    public void applyEffectToPlayer(Flag p){
+        if (p.getObjType() == FLAG) {
+            lastCheck = playing.savePoint();
+            System.out.println(1);
+        }
     }
 
     public void loadObjects(Level newLevel) {
@@ -51,7 +55,6 @@ public class ObjectManager {
         for (Flag p : checkpoint)
             if (p.isActive())
                 p.update();
-
     }
 
     public void draw(Graphics g, int xLvlOffset) {
@@ -65,6 +68,10 @@ public class ObjectManager {
                 g.drawImage(flagSprite, (int) (p.getHitbox().x - p.getxDrawOffset() - xLvlOffset), (int) (p.getHitbox().y - p.getyDrawOffset()), FLAG_WIDTH, FLAG_HEIGHT,
                         null);
             }
+    }
+
+    public void restore(){
+        lastCheck.restore();
     }
 
     public void resetAllObjects() {

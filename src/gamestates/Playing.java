@@ -89,6 +89,7 @@ public class Playing extends State implements Statemethods {
         } else if (!gameOver) {
             levelManager.update();
             player.update();
+
             enemyManager.update(levelManager.getCurrentLevel().getLevelData(), player);
             objectManager.update();
             checkCloseToBorder();
@@ -151,12 +152,19 @@ public class Playing extends State implements Statemethods {
         enemyManager.resetAllEnemies();
     }
 
-    public Checkpoint savePoint() {
+    public void restore() {
         gameOver = false;
         paused = false;
         lvlCompleted = false;
+        objectManager.restore();
+    }
 
-        return new Checkpoint(this, enemyManager, player);
+    public Checkpoint savePoint() {
+        return new Checkpoint(this, getEnemyManager(), getPlayer(), getObjectManager());
+    }
+
+    public void checkPotionTouched(Rectangle2D.Float hitbox) {
+        objectManager.checkObjectTouched(hitbox);
     }
 
     public void setGameOver(boolean gameOver) {
@@ -284,6 +292,9 @@ public class Playing extends State implements Statemethods {
     public LevelManager getLevelManager() {
         return levelManager;
     }
+    public ObjectManager getObjectManager() {
+        return objectManager;
+    }
 
     public void setPlayer(Player player) {
         this.player = player;
@@ -292,4 +303,8 @@ public class Playing extends State implements Statemethods {
     public void setEnemyManager(EnemyManager enemyManager) {
         this.enemyManager = enemyManager;
     }
+
+    public void setObjectManager(ObjectManager objectManager) { this.objectManager = objectManager;}
+
+
 }
